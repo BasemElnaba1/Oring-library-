@@ -1,0 +1,97 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:first_name",
+ "creation": "2026-10-06 19:05:48.532034",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "library_member",
+  "first_name",
+  "last_name",
+  "email",
+  "phone",
+  "max_active_rentals",
+  "outstanding_debt",
+  "is_suspended"
+ ],
+ "fields": [
+  {
+   "fieldname": "library_member",
+   "fieldtype": "Section Break",
+   "label": "Library Member"
+  },
+  {
+   "fieldname": "first_name",
+   "fieldtype": "Data",
+   "label": "First Name ",
+   "unique": 1
+  },
+  {
+   "fieldname": "last_name",
+   "fieldtype": "Data",
+   "label": "Last Name "
+  },
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "label": "Email"
+  },
+  {
+   "fieldname": "phone",
+   "fieldtype": "Data",
+   "label": "Phone "
+  },
+  {
+   "default": "3",
+   "fieldname": "max_active_rentals",
+   "fieldtype": "Int",
+   "label": "Max Active Rentals"
+  },
+  {
+   "default": "0",
+   "fieldname": "outstanding_debt",
+   "fieldtype": "Currency",
+   "label": "Outstanding Debt",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_suspended",
+   "fieldtype": "Check",
+   "label": "Is Suspended"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-10-07 19:28:57.865343",
+ "modified_by": "Administrator",
+ "module": "Oring Libarary",
+ "name": "Library Member",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "search_fields": "first_name, last_name, email",
+ "show_title_field_in_link": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "first_name",
+ "track_changes": 1
+}

@@ -1,0 +1,155 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-10-06 19:16:39.898083",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "article",
+  "library_member",
+  "type",
+  "date",
+  "rental_duration_days",
+  "due_date",
+  "rental_fee",
+  "late_fee",
+  "total_amount",
+  "payment_status",
+  "request_status",
+  "rejection_reason",
+  "reference_issue",
+  "submitted_on"
+ ],
+ "fields": [
+  {
+   "fieldname": "article",
+   "fieldtype": "Link",
+   "label": "Article",
+   "options": "Article",
+   "reqd": 1
+  },
+  {
+   "fieldname": "library_member",
+   "fieldtype": "Link",
+   "label": "Library Member",
+   "options": "Library Member",
+   "reqd": 1
+  },
+  {
+   "default": "Issue",
+   "fieldname": "type",
+   "fieldtype": "Select",
+   "label": "Type",
+   "options": "Issue\nReturn",
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date",
+   "reqd": 1
+  },
+  {
+   "default": "7",
+   "fieldname": "rental_duration_days",
+   "fieldtype": "Int",
+   "label": "Rental Duration (Days)"
+  },
+  {
+   "fieldname": "due_date",
+   "fieldtype": "Date",
+   "label": "Due Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rental_fee",
+   "fieldtype": "Currency",
+   "label": "Rental Fee",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "late_fee",
+   "fieldtype": "Currency",
+   "label": "Late Fee",
+   "allow_on_submit": 1
+  },
+  {
+   "fieldname": "total_amount",
+   "fieldtype": "Currency",
+   "label": "Total Amount",
+   "read_only": 1,
+   "allow_on_submit": 1
+  },
+  {
+   "default": "Unpaid",
+   "fieldname": "payment_status",
+   "fieldtype": "Select",
+   "label": "Payment Status",
+   "options": "Unpaid\nPaid\nRefunded",
+   "allow_on_submit": 1
+  },
+  {
+   "fieldname": "request_status",
+   "fieldtype": "Select",
+   "label": "Request Status",
+   "options": "Pending\nApproved\nRejected",
+   "default": "Pending",
+   "read_only": 1,
+   "depends_on": "eval:doc.type === \"Issue\""
+  },
+  {
+   "fieldname": "rejection_reason",
+   "fieldtype": "Small Text",
+   "label": "Rejection Reason",
+   "read_only": 1,
+   "depends_on": "eval:doc.request_status === \"Rejected\""
+  },
+  {
+   "fieldname": "reference_issue",
+   "fieldtype": "Link",
+   "label": "Original Issue",
+   "options": "Library Transaction",
+   "read_only": 1,
+   "depends_on": "eval:doc.type === \"Return\""
+  },
+  {
+   "fieldname": "submitted_on",
+   "fieldtype": "Datetime",
+   "label": "Confirmed On",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-10-07 19:33:57.790867",
+ "modified_by": "Administrator",
+ "module": "Oring Libarary",
+ "name": "Library Transaction",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

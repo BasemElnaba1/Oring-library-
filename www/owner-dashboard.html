@@ -1,0 +1,102 @@
+{% extends "templates/web.html" %}
+{% set body_class = "library-books-page owner-dashboard-page" %}
+{% set library_name = app_name if app_name and app_name != "Frappe" else _("Oring Library") %}
+{% set library_login_redirect = '%2Fowner-dashboard' %}
+
+{% block style %}
+{{ super() }}
+<style>{% include "library_management/public/css/books.css" %}</style>
+<style>{% include "library_management/public/css/owner_dashboard.css" %}</style>
+{% endblock %}
+
+{% block navbar %}
+{% include "library_management/templates/includes/library_navbar.html" %}
+{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block page_content %}
+<div class="owner-dashboard" id="owner-dashboard" dir="rtl">
+	<header class="owner-dashboard-heading">
+		<div>
+			<p class="library-books-eyebrow">إدارة المكتبة</p>
+			<h1>كل تفاصيل العمل، في مكان واحد.</h1>
+			<p>راجع الطلبات، تابع الاستعارات، وأدر الكتب والأعضاء والمدفوعات.</p>
+		</div>
+		<div class="owner-dashboard-quick-actions">
+			<button class="library-books-button" type="button" data-action="new-issue">استعارة جديدة</button>
+			<button class="library-books-button library-books-button-outline" type="button" data-action="new-book">إضافة كتاب</button>
+			<button class="library-books-button library-books-button-outline" type="button" data-action="new-member">إضافة عضو</button>
+		</div>
+	</header>
+
+	<noscript><p class="owner-dashboard-empty">فعّل JavaScript لاستخدام أدوات الإدارة والرسوم البيانية.</p></noscript>
+	<div class="owner-dashboard-period">
+		<div><span class="owner-dashboard-period-label">فترة الملخص المالي</span><p>بيانات التشغيل والمستحقات تعرض الحالة الحالية لجميع السجلات.</p></div>
+		<div id="owner-from-date"></div>
+		<div id="owner-to-date"></div>
+		<button class="library-books-button library-books-button-outline" type="button" id="owner-refresh">تحديث</button>
+	</div>
+	<p class="owner-dashboard-status" id="owner-dashboard-status" role="status" aria-live="polite">جارٍ تحميل أدوات الإدارة…</p>
+
+	<section class="owner-dashboard-metrics" aria-label="مؤشرات المكتبة">
+		{% for key, label in [('available', 'كتب متاحة'), ('active', 'استعارات نشطة'), ('pending', 'طلبات بانتظار المراجعة'), ('overdue', 'استعارات متأخرة'), ('paid', 'مسجّل كمدفوع خلال الفترة'), ('outstanding', 'مستحقات غير مدفوعة') ] %}
+		<div class="owner-dashboard-metric">
+			<span>{{ label }}</span>
+			<strong data-metric="{{ key }}">{{ dashboard.summary[key] }}</strong>
+			<small data-metric-note="{{ key }}"></small>
+		</div>
+		{% endfor %}
+	</section>
+
+	<section class="owner-dashboard-charts" aria-label="التقارير البيانية">
+		<div class="owner-dashboard-panel">
+			<div class="owner-dashboard-panel-heading"><div><h2>قيمة التأجير المؤكّد</h2><p>حسب شهر اعتماد الاستعارة وحالة الدفع الحالية.</p></div></div>
+			<div id="owner-revenue-chart" class="owner-dashboard-chart" dir="ltr"></div>
+			<div class="owner-dashboard-finance-totals">
+				<div><span>إجمالي الرسوم خلال الفترة</span><strong id="owner-billed"></strong></div>
+				<div><span>مسجّل كمُستردّ خلال الفترة</span><strong id="owner-refunded"></strong></div>
+			</div>
+			<p class="owner-dashboard-note">الملخص يشمل رسوم التأجير والتأخير. التأمين يُعرض منفصلاً ضمن بيانات الكتاب، ولا يُحتسب إيراداً.</p>
+		</div>
+		<div class="owner-dashboard-panel">
+			<div class="owner-dashboard-panel-heading"><div><h2>حالة الكتب</h2><p id="owner-inventory-summary"></p></div></div>
+			<div id="owner-inventory-chart" class="owner-dashboard-chart" dir="ltr"></div>
+			<div id="owner-inventory-legend" class="owner-inventory-legend"></div>
+		</div>
+	</section>
+
+	<section class="owner-dashboard-panel owner-dashboard-alerts" id="owner-alerts-panel" hidden aria-labelledby="owner-alerts-title">
+		<h2 id="owner-alerts-title">سجلات تحتاج مراجعتك</h2>
+		<p class="owner-dashboard-note">راجع هذه البيانات للحفاظ على دقة حالة المكتبة وتقاريرها.</p>
+		<ul id="owner-alerts"></ul>
+	</section>
+
+	<section class="owner-dashboard-panel owner-dashboard-workspace" aria-label="عمليات المكتبة">
+		<div class="owner-dashboard-workspace-header">
+			<div class="owner-dashboard-tabs" role="tablist" aria-label="أقسام الإدارة">
+				{% for key, label in [('requests', 'الطلبات'), ('rentals', 'الاستعارات'), ('books', 'الكتب'), ('members', 'الأعضاء'), ('payments', 'المدفوعات'), ('history', 'السجل') ] %}
+				<button id="owner-tab-{{ key }}" type="button" role="tab" data-tab="{{ key }}" aria-controls="owner-panel-{{ key }}" aria-selected="{{ 'true' if loop.first else 'false' }}" tabindex="{{ '0' if loop.first else '-1' }}" class="{{ 'is-active' if loop.first else '' }}">{{ label }}</button>
+				{% endfor %}
+			</div>
+			<div class="owner-dashboard-table-filters"><div id="owner-search"></div><div id="owner-book-status"></div></div>
+		</div>
+		{% for key, label, note in [('requests', 'طلبات التأجير', 'اعتماد الطلب يؤكد الاستعارة ويغيّر حالة الكتاب. الرفض يحتفظ بالطلب وسبب الرفض.'), ('rentals', 'الاستعارات النشطة', 'المعاملات المؤكدة التي لم يسجّل لها إرجاع بعد. التأخير محسوب وفق تاريخ اليوم.'), ('books', 'دليل الكتب', 'أدر بيانات الكتب وأسعار التأجير والتأمين. حالة الاستعارة تتحدث من المعاملات المؤكدة.'), ('members', 'أعضاء المكتبة', 'تابع حدود الاستعارة والمستحقات، وعدّل العضوية أو فعّل الإيقاف عند الحاجة.'), ('payments', 'مدفوعات الاستعارات', 'جميع الاستعارات المؤكدة. تحديث حالة الدفع يسجّل المدفوعات ولا ينفّذ تحويلاً مالياً.'), ('history', 'سجل العمليات', 'أحدث 100 معاملة. افتح السجل الكامل في Frappe لمراجعة جميع العمليات والتعديلات.') ] %}
+		<div id="owner-panel-{{ key }}" role="tabpanel" aria-labelledby="owner-tab-{{ key }}" {% if not loop.first %}hidden{% endif %}>
+			<div class="owner-dashboard-panel-heading"><div><h2>{{ label }}</h2><p>{{ note }}</p></div>{% if key == 'history' %}<a class="library-books-text-link" href="/app/library-transaction">السجل الكامل &larr;</a>{% endif %}</div>
+			<div id="owner-table-{{ key }}" class="owner-dashboard-table-wrap"></div>
+		</div>
+		{% endfor %}
+	</section>
+</div>
+<script type="application/json" id="owner-dashboard-data">{{ dashboard | tojson }}</script>
+{% endblock %}
+
+{% block footer %}
+{% include "library_management/templates/includes/library_footer.html" %}
+{% endblock %}
+
+{% block script %}
+{{ include_script('library_owner.bundle.js') }}
+<script>{% include "library_management/public/js/owner_dashboard.js" %}</script>
+{% endblock %}

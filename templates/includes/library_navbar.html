@@ -1,0 +1,21 @@
+<header class="library-books-navbar" dir="rtl">
+	<div class="library-books-nav-inner">
+		<a class="library-books-brand" href="/books" aria-label="{{ library_name | e }} — المكتبة">
+			<svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+				<path d="M16 8C12 5 7 5 3 6v20c4-1 9-1 13 2 4-3 9-3 13-2V6c-4-1-9-1-13 2Zm0 0v20" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+			</svg>
+			<span>{{ library_name | e }}</span>
+		</a>
+		<nav class="library-books-nav-links" aria-label="التنقل الرئيسي">
+			{% if can_manage_library() %}
+			<a href="/owner-dashboard" class="library-owner-nav-link">لوحة الإدارة</a>
+			{% endif %}
+			<a href="/books#library-collection" class="library-books-nav-browse">تصفّح الكتب</a>
+			{% if frappe.session.user == "Guest" %}
+			<a class="library-books-button" href="/login?redirect-to={{ library_login_redirect | default('%2Fbooks') }}">تسجيل الدخول</a>
+			{% else %}
+			<a class="library-books-button library-books-button-outline" href="/me">حسابي</a>
+			{% endif %}
+		</nav>
+	</div>
+</header>

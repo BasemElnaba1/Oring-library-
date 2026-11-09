@@ -1,0 +1,264 @@
+body[data-path="login"] {
+	background: #f5f3ee;
+}
+
+body[data-path="login"] .page-content-wrapper {
+	min-height: calc(100vh - 100px);
+}
+
+.library-login {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	max-width: 960px;
+	margin: clamp(24px, 7vh, 80px) auto;
+	border: 1px solid #dddeda;
+	border-radius: 24px;
+	background: #fff;
+	box-shadow: 0 20px 60px rgb(30 52 47 / 8%);
+	overflow: hidden;
+	color: #243e37;
+}
+
+.library-login-intro {
+	display: flex;
+	flex-direction: column;
+	padding: 44px;
+	background: #e9efea;
+}
+
+.library-login-brand {
+	display: inline-flex;
+	align-items: center;
+	gap: 12px;
+	width: fit-content;
+	color: #243e37;
+	font-size: 18px;
+	font-weight: 650;
+}
+
+.library-login-brand svg {
+	flex-shrink: 0;
+}
+
+.library-login-welcome {
+	margin: 64px 0 32px;
+}
+
+.library-login-eyebrow {
+	color: #446257;
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.16em;
+}
+
+.library-login-welcome h1 {
+	margin: 16px 0;
+	color: #243e37;
+	font-family: Georgia, "Times New Roman", serif;
+	font-size: clamp(32px, 3.5vw, 44px);
+	font-weight: 400;
+	line-height: 1.15;
+}
+
+.library-login-welcome > p:last-child {
+	color: #4e655d;
+	font-size: 15px;
+	line-height: 1.7;
+}
+
+.library-login-books {
+	display: flex;
+	align-items: flex-end;
+	gap: 8px;
+	height: 120px;
+	margin-top: auto;
+	padding: 0 12px;
+	border-bottom: 4px solid #a6b7a9;
+}
+
+.library-login-books span {
+	width: 40px;
+	height: 90px;
+	border: 1px solid rgb(36 62 55 / 12%);
+	border-radius: 5px 5px 0 0;
+	background: #708d7c;
+	box-shadow: inset 5px 0 rgb(255 255 255 / 15%);
+}
+
+.library-login-books span:nth-child(2) {
+	height: 110px;
+	background: #b99a71;
+}
+
+.library-login-books span:nth-child(3) {
+	height: 80px;
+	background: #d0b9a3;
+}
+
+.library-login-books span:nth-child(4) {
+	height: 104px;
+	background: #446257;
+}
+
+.library-login-books span:nth-child(5) {
+	height: 95px;
+	background: #a6b7a9;
+}
+
+.library-login-forms {
+	min-width: 0;
+	padding: 40px;
+	align-self: center;
+}
+
+.library-login .page-card-head {
+	padding: 0 0 24px;
+}
+
+.library-login .page-card-head .app-logo {
+	max-width: 100%;
+	object-fit: contain;
+}
+
+.library-login .app-logo[src="/assets/frappe/images/frappe-framework-logo.svg"] {
+	display: none;
+}
+
+.library-login .app-logo[src="/assets/frappe/images/frappe-framework-logo.svg"] + h4 {
+	margin-top: 0;
+}
+
+.library-login .page-card-head h4 {
+	color: #243e37;
+	font-size: 22px;
+	line-height: 1.4;
+}
+
+.library-login .page-card {
+	max-width: none;
+	padding: 0;
+	border: 0;
+	border-radius: 0;
+	box-shadow: none;
+}
+
+.library-login .page-card form {
+	max-width: none;
+}
+
+.library-login .page-card .form-group {
+	margin-bottom: 20px;
+}
+
+.library-login .form-label.sr-only {
+	position: static;
+	width: auto;
+	height: auto;
+	margin: 0 0 8px;
+	clip: auto;
+	white-space: normal;
+	overflow: visible;
+}
+
+.library-login .page-card .page-card-body .form-control {
+	min-height: 48px;
+	margin-bottom: 0;
+	border: 1px solid #c4cfc8;
+	border-radius: 8px;
+	background: #fafbf9;
+	color: #243e37;
+	font-size: 16px;
+}
+
+.library-login .page-card .page-card-body .form-control:focus {
+	border-color: #446257;
+	box-shadow: 0 0 0 3px rgb(68 98 87 / 16%);
+}
+
+.library-login .page-card .page-card-body.invalid .form-control {
+	border-color: var(--red-500, #c23939);
+}
+
+.library-login .page-card .page-card-body .field-icon {
+	top: 16px;
+	left: 12px;
+}
+
+.library-login .page-card .page-card-body .password-field input {
+	padding-right: 64px;
+}
+
+.library-login .page-card .page-card-body .toggle-password {
+	top: 14px;
+	right: 12px;
+	color: #446257 !important;
+}
+
+.library-login .page-card .page-card-body .forgot-password-message {
+	margin-top: 16px;
+	line-height: 1.5;
+}
+
+.library-login .sign-up-message,
+.library-login .page-card .page-card-body .forgot-password-message a {
+	color: #52645c;
+}
+
+.library-login a:focus-visible,
+.library-login button:focus-visible {
+	outline: 3px solid #708d7c;
+	outline-offset: 3px;
+}
+
+.library-login .page-card .btn {
+	min-height: 46px;
+	border-radius: 8px;
+	white-space: normal;
+}
+
+.library-login .btn-primary {
+	border-color: #243e37;
+	background: #243e37;
+	color: #fff;
+	font-size: 15px;
+	font-weight: 600;
+}
+
+.library-login .btn-primary:hover {
+	border-color: #34574c;
+	background: #34574c;
+}
+
+.library-login .sign-up-message a {
+	color: #243e37;
+	font-weight: 600;
+}
+
+@media (max-width: 767px) {
+	.library-login {
+		grid-template-columns: 1fr;
+		max-width: 480px;
+		margin: 16px auto;
+		border-radius: 16px;
+	}
+
+	.library-login-intro {
+		padding: 24px;
+	}
+
+	.library-login-welcome {
+		margin: 24px 0 0;
+	}
+
+	.library-login-welcome h1 {
+		font-size: 30px;
+	}
+
+	.library-login-books {
+		display: none;
+	}
+
+	.library-login-forms {
+		padding: 28px 24px;
+	}
+}

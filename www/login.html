@@ -1,0 +1,26 @@
+{% extends "frappe/www/login.html" %}
+
+{% block page_content %}
+<div class="library-login">
+	<aside class="library-login-intro" aria-labelledby="library-login-title">
+		<a class="library-login-brand" href="/books">
+			<svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+				<path d="M16 8C12 5 7 5 3 6v20c4-1 9-1 13 2 4-3 9-3 13-2V6c-4-1-9-1-13 2Zm0 0v20" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+			</svg>
+			<span>{{ app_name | e }}</span>
+		</a>
+		<div class="library-login-welcome">
+			<p class="library-login-eyebrow">{{ _("YOUR NEXT CHAPTER") }}</p>
+			<h1 id="library-login-title">{{ _("A world of knowledge awaits.") }}</h1>
+			<p>{{ _("Sign in to explore the library, discover new books, and keep learning.") }}</p>
+			<a class="library-login-brand" href="/books">{{ _("Browse books") }} &rarr;</a>
+		</div>
+		<div class="library-login-books" aria-hidden="true">
+			<span></span><span></span><span></span><span></span><span></span>
+		</div>
+	</aside>
+	<div class="library-login-forms">
+		{{ super() }}
+	</div>
+</div>
+{% endblock %}

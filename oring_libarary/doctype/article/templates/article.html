@@ -1,0 +1,152 @@
+{% extends "templates/web.html" %}
+{% set body_class = "library-books-page library-book-detail-page" %}
+{% set library_name = app_name if app_name and app_name != "Frappe" else _("Oring Library") %}
+{% set library_login_redirect = ('/' + doc.route) | urlencode %}
+
+{% block title %}{{ doc.title | e }} | {{ library_name | e }}{% endblock %}
+
+{% block style %}
+{{ super() }}
+<style>{% include "library_management/public/css/books.css" %}</style>
+<style>{% include "library_management/public/css/book_details.css" %}</style>
+{% endblock %}
+
+{% block navbar %}
+{% include "library_management/templates/includes/library_navbar.html" %}
+{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block page_content %}
+<div class="library-book-detail" dir="rtl">
+	<nav class="library-book-detail-breadcrumbs" aria-label="مسار التنقل">
+		<a href="/books#library-collection"><span aria-hidden="true">&rarr;</span> العودة إلى المكتبة</a>
+		<span class="library-book-detail-separator" aria-hidden="true">/</span>
+		<span aria-current="page">تفاصيل الكتاب</span>
+	</nav>
+
+	<article class="library-book-detail-card" aria-labelledby="library-book-detail-title">
+		<div class="library-book-detail-cover-panel">
+			{% if doc.image %}
+			<img class="library-book-detail-image" src="{{ doc.image | e }}" alt="غلاف {{ doc.title | e }}" width="240" height="336" fetchpriority="high" decoding="async">
+			{% else %}
+			<div class="library-book-cover" aria-hidden="true">
+				<svg width="36" height="36" viewBox="0 0 32 32" fill="none">
+					<path d="M16 8C12 5 7 5 3 6v20c4-1 9-1 13 2 4-3 9-3 13-2V6c-4-1-9-1-13 2Zm0 0v20" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
+				</svg>
+				<span dir="auto">{{ doc.title | e }}</span>
+				<small dir="auto">{{ (doc.author or library_name) | e }}</small>
+			</div>
+			{% endif %}
+			<p class="library-book-detail-cover-caption">كل كتاب بداية جديدة.</p>
+		</div>
+
+		<div class="library-book-detail-content">
+			<div class="library-book-detail-meta">
+				<span class="library-book-badge {{ 'is-available' if doc.status == 'Available' and doc.is_rentable else 'is-issued' }}">{{ 'متاح للتأجير' if doc.status == 'Available' and doc.is_rentable else 'غير متاح حالياً' }}</span>
+				{% if doc.ispn %}
+				<span class="library-book-detail-isbn"><bdi dir="ltr">ISBN: {{ doc.ispn | e }}</bdi></span>
+				{% endif %}
+			</div>
+
+			<h1 id="library-book-detail-title" dir="auto">{{ doc.title | e }}</h1>
+			<p class="library-book-detail-author">المؤلف: <bdi>{{ (doc.author or 'غير محدد') | e }}</bdi></p>
+
+			<dl class="library-book-detail-pricing">
+				<div>
+					<dt>التأجير اليومي</dt>
+					<dd><bdi dir="ltr">EGP {{ "%.2f" | format(doc.rental_rate_per_day or 0) }}</bdi><small> / يوم</small></dd>
+				</div>
+				<div>
+					<dt>مبلغ التأمين المسترد</dt>
+					<dd><bdi dir="ltr">EGP {{ "%.2f" | format(doc.security_deposit or 0) }}</bdi></dd>
+				</div>
+			</dl>
+
+			<section class="library-book-detail-description" aria-labelledby="library-book-about-title">
+				<h2 id="library-book-about-title">عن الكتاب</h2>
+				<div class="library-book-detail-description-content">{{ doc.description or 'لا يوجد وصف متاح لهذا الكتاب حالياً.' }}</div>
+			</section>
+
+			<div class="library-book-detail-actions">
+				{% if doc.status == 'Available' and doc.is_rentable %}
+					{% if frappe.session.user == "Guest" %}
+					<a id="btn-login-to-rent" class="library-books-button library-book-detail-rent" href="/login?redirect-to={{ library_login_redirect }}">تسجيل الدخول لطلب التأجير</a>
+					<p class="library-book-detail-note">سجّل الدخول بحساب مرتبط بعضويتك في المكتبة لطلب هذا الكتاب.</p>
+					{% else %}
+					<button id="btn-rent" class="library-books-button library-book-detail-rent" type="button" data-article="{{ doc.name | e }}">طلب تأجير الكتاب</button>
+					<p class="library-book-detail-note">تراجع إدارة المكتبة طلبك قبل تأكيد الاستعارة وتسليم الكتاب.</p>
+					{% endif %}
+				{% else %}
+				<button class="library-books-button library-book-detail-rent" type="button" disabled>الكتاب غير متاح للتأجير حالياً</button>
+				<a class="library-books-text-link" href="/books#library-collection">اكتشف كتباً أخرى <span aria-hidden="true">&larr;</span></a>
+				{% endif %}
+			</div>
+		</div>
+	</article>
+</div>
+{% endblock %}
+
+{% block footer %}
+{% include "library_management/templates/includes/library_footer.html" %}
+{% endblock %}
+
+{% block script %}
+<script>
+frappe.ready(function () {
+    const button = document.getElementById('btn-rent');
+    if (button) {
+        button.addEventListener('click', function () {
+            request_rental(button.dataset.article);
+        });
+    }
+});
+
+function request_rental(article_name) {
+    // 1. التحقق من تسجيل الدخول في Frontend
+    if (!frappe.session || frappe.session.user === "Guest") {
+        frappe.msgprint({
+            title: __('تسجيل الدخول مطلوب'),
+            indicator: 'orange',
+            message: __('يرجى تسجيل الدخول أولاً لتمكن من تقديم طلب التأجير.'),
+            primary_action: {
+                label: __('تسجيل الدخول'),
+                action: function() {
+                    window.location.href = "/login?redirect-to=" + encodeURIComponent(window.location.pathname);
+                }
+            }
+        });
+        return;
+    }
+
+    const btn = document.getElementById('btn-rent');
+    if (btn && btn.disabled) return;
+    if (btn) btn.disabled = true;
+
+    // 2. استدعاء الـ API بمسار الموديول المباشر الصحيح
+    frappe.call({
+        method: "library_management.oring_libarary.doctype.article.article.create_rental_request",
+        args: {
+            article: article_name
+        },
+        callback: function(r) {
+            if (btn) btn.disabled = false;
+            if (!r.exc && r.message) {
+                if (btn) {
+                    btn.disabled = true;
+                    btn.textContent = __('تم تقديم طلب التأجير');
+                }
+                frappe.msgprint({
+                    title: __('تم تسجيل الطلب'),
+                    indicator: 'green',
+                    message: __('تم تقديم طلب تأجير الكتاب بنجاح! سيتم مراجعته من قبل إدارة المكتبة.')
+                });
+            }
+        },
+        error: function(r) {
+            if (btn) btn.disabled = false;
+        }
+    });
+}
+</script>
+{% endblock %}

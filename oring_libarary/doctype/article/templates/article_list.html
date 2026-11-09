@@ -1,0 +1,164 @@
+{% extends "templates/web.html" %}
+{% set body_class = "library-books-page" %}
+{% set library_name = app_name if app_name and app_name != "Frappe" else _("Oring Library") %}
+{% set articles = frappe.get_all("Article", filters={"is_rentable": 1}, fields=["name", "title", "author", "image", "status", "rental_rate_per_day", "route"], order_by="title asc") %}
+{% set available_count = articles | selectattr("status", "equalto", "Available") | list | length %}
+
+{% block title %}الكتب | {{ library_name | e }}{% endblock %}
+
+{% block style %}
+{{ super() }}
+<style>{% include "library_management/public/css/books.css" %}</style>
+{% endblock %}
+
+{% block navbar %}
+{% include "library_management/templates/includes/library_navbar.html" %}
+{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block page_content %}
+<div class="library-books" dir="rtl">
+	<section class="library-books-hero" aria-labelledby="library-books-title">
+		<div class="library-books-welcome">
+			<p class="library-books-eyebrow">فصلك القادم</p>
+			<h1 id="library-books-title">عالم من المعرفة ينتظرك.</h1>
+			<p class="library-books-description">تصفّح كتب المكتبة، اختر قراءتك القادمة، وقدّم طلب التأجير في خطوات بسيطة.</p>
+			<div class="library-books-hero-actions">
+				{% if frappe.session.user == "Guest" %}
+				<a class="library-books-button" href="/login?redirect-to=%2Fbooks">سجّل الدخول لبدء القراءة</a>
+				{% endif %}
+				<a class="library-books-text-link" href="#library-collection">اكتشف الكتب <span aria-hidden="true">&larr;</span></a>
+			</div>
+		</div>
+		<div class="library-books-hero-detail">
+			<div class="library-books-shelf" aria-hidden="true">
+				<span></span><span></span><span></span><span></span><span></span>
+			</div>
+			<dl class="library-books-stats">
+				<div><dt>كتب في المكتبة</dt><dd>{{ articles | length }}</dd></div>
+				<div><dt>متاحة للتأجير</dt><dd>{{ available_count }}</dd></div>
+			</dl>
+		</div>
+	</section>
+
+	<section class="library-books-collection" id="library-collection" aria-labelledby="library-collection-title">
+		<div class="library-books-collection-heading">
+			<div>
+				<p class="library-books-eyebrow">قراءة تستحق وقتك</p>
+				<h2 id="library-collection-title">تصفّح المكتبة</h2>
+			</div>
+			<p class="library-books-count" role="status" aria-live="polite" aria-atomic="true">عدد الكتب: <span id="library-books-count">{{ articles | length }}</span></p>
+		</div>
+
+		{% if articles %}
+		<form class="library-books-filters" id="library-books-filters" role="search" hidden>
+			<div class="library-books-search">
+				<label for="library-books-search">ابحث عن كتاب</label>
+				<div class="library-books-search-field">
+					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.8" /><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
+					<input id="library-books-search" type="search" name="q" placeholder="عنوان الكتاب أو اسم المؤلف" autocomplete="off">
+				</div>
+			</div>
+			<div class="library-books-availability">
+				<label for="library-books-availability">حالة الكتاب</label>
+				<select id="library-books-availability" name="availability">
+					<option value="">جميع الكتب</option>
+					<option value="Available">متاح للتأجير</option>
+					<option value="Issued">مستعار حالياً</option>
+				</select>
+			</div>
+		</form>
+
+		<div class="library-books-grid" id="library-books-grid">
+			{% for book in articles %}
+			<article class="library-book-card" data-title="{{ book.title | e }}" data-author="{{ (book.author or '') | e }}" data-status="{{ book.status | e }}" aria-labelledby="library-book-title-{{ loop.index }}">
+				<div class="library-book-art library-book-art-{{ loop.index % 3 }}">
+					<span class="library-book-badge {{ 'is-available' if book.status == 'Available' else 'is-issued' }}">{{ 'متاح للتأجير' if book.status == 'Available' else 'مستعار حالياً' }}</span>
+					{% if book.image %}
+					<img src="{{ book.image | e }}" alt="غلاف {{ book.title | e }}" loading="lazy" decoding="async" width="160" height="224">
+					{% else %}
+					<div class="library-book-cover" aria-hidden="true">
+						<svg width="28" height="28" viewBox="0 0 32 32" fill="none"><path d="M16 8C12 5 7 5 3 6v20c4-1 9-1 13 2 4-3 9-3 13-2V6c-4-1-9-1-13 2Zm0 0v20" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" /></svg>
+						<span dir="auto">{{ book.title | e }}</span>
+						<small dir="auto">{{ (book.author or library_name) | e }}</small>
+					</div>
+					{% endif %}
+				</div>
+				<div class="library-book-info">
+					<h3 id="library-book-title-{{ loop.index }}" dir="auto">{{ book.title | e }}</h3>
+					<p class="library-book-author">المؤلف: <bdi>{{ (book.author or 'غير محدد') | e }}</bdi></p>
+					<div class="library-book-action">
+						<div class="library-book-price">
+							<span>التأجير اليومي</span>
+							<strong><bdi dir="ltr">EGP {{ "%.2f" | format(book.rental_rate_per_day or 0) }}</bdi><small> / يوم</small></strong>
+						</div>
+						{% if book.route %}
+						<a class="library-books-button {{ 'library-books-button-outline' if book.status != 'Available' else '' }}" href="/{{ book.route | e }}" aria-label="عرض تفاصيل {{ book.title | e }}">{{ 'عرض الكتاب' if book.status == 'Available' else 'عرض التفاصيل' }}</a>
+						{% else %}
+						<span class="library-book-coming-soon">التفاصيل قريباً</span>
+						{% endif %}
+					</div>
+				</div>
+			</article>
+			{% endfor %}
+		</div>
+
+		<div class="library-books-empty" id="library-books-no-results" hidden>
+			<h3>لم نعثر على كتاب مطابق.</h3>
+			<p>جرّب عنواناً آخر أو اعرض جميع الكتب.</p>
+			<button class="library-books-button library-books-button-outline" type="button" id="library-books-reset">عرض جميع الكتب</button>
+		</div>
+		{% else %}
+		<div class="library-books-empty">
+			<h3>رفوفنا تنتظر حكايات جديدة.</h3>
+			<p>لا توجد كتب متاحة في الكتالوج حالياً. عُد قريباً لاكتشاف قراءتك القادمة.</p>
+		</div>
+		{% endif %}
+	</section>
+</div>
+{% endblock %}
+
+{% block footer %}
+{% include "library_management/templates/includes/library_footer.html" %}
+{% endblock %}
+
+{% block script %}
+<script>
+frappe.ready(function () {
+	const filters = document.getElementById("library-books-filters");
+	if (!filters) return;
+	const search = document.getElementById("library-books-search");
+	const availability = document.getElementById("library-books-availability");
+	const cards = Array.from(document.querySelectorAll(".library-book-card"));
+	const count = document.getElementById("library-books-count");
+	const empty = document.getElementById("library-books-no-results");
+	const normalize = (value) => value.normalize("NFKD").replace(/[\u0300-\u036f\u064b-\u065f\u0670]/g, "").toLocaleLowerCase().trim();
+	function filterBooks() {
+		const terms = normalize(search.value).split(/\s+/).filter(Boolean);
+		let visible = 0;
+		cards.forEach(function (card) {
+			const text = normalize(card.dataset.title + " " + card.dataset.author);
+			const matches = terms.every((term) => text.includes(term)) && (!availability.value || card.dataset.status === availability.value);
+			card.hidden = !matches;
+			if (matches) visible++;
+		});
+		count.textContent = String(visible);
+		empty.hidden = visible > 0;
+	}
+	filters.hidden = false;
+	search.addEventListener("input", filterBooks);
+	availability.addEventListener("change", filterBooks);
+	filters.addEventListener("submit", function (event) {
+		event.preventDefault();
+		filterBooks();
+	});
+	document.getElementById("library-books-reset").addEventListener("click", function () {
+		search.value = "";
+		availability.value = "";
+		filterBooks();
+		search.focus();
+	});
+});
+</script>
+{% endblock %}
